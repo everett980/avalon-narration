@@ -57,21 +57,31 @@ const roles = [{
 }];
 
 console.log('yo man');
-let players;
 const toggleViewById = id => {
   const targetStyle = document.getElementById(id).style;
   targetStyle.display = targetStyle.display === 'none'
     ? 'block'
     : 'none';
 }
+let warning;
 
 document.getElementById('start').onclick = () => {
+  if (warning) {
+    document.body.removeChild(warning);
+    warning = undefined;
+  }
+  const players = document.getElementById('playerCSV').value.split(',');
+  if (players.length > 10) {
+    warning = document.createElement('p');
+    warning.innerHTML = `Too many players! Max is 10, attempted to have ${players.length}`;
+    document.body.appendChild(warning);
+    return;
+  }
   const antiCheat = document.createElement('p');
   antiCheat.innerHTML = `Anti Cheat Number: ${Math.floor(Math.random()*1000)}`;
   document.body.appendChild(antiCheat);
 
   let playerClickCount = 0;
-  players = document.getElementById('playerCSV').value.split(',');
   const rolesInPlay = roles.slice(0,players.length);
   const playerInfo = {};
   console.log(players);
@@ -91,6 +101,9 @@ document.getElementById('start').onclick = () => {
     const title = document.createElement('h3');
     title.innerHTML = playerInfo[player].name;
     infoContainer.appendChild(title);
+    const alignment = document.createElement('p');
+    alignment.innerHTML = `You are on the ${playerInfo[player].isGood ? 'good' : 'evil'} team`;
+    infoContainer.appendChild(alignment);
     const description = document.createElement('div');
     description.innerHTML = playerInfo[player].knowledge;
     infoContainer.appendChild(description);
