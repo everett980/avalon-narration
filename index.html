@@ -1,0 +1,156 @@
+<h1>Avalon Narration</h1>
+<div id='setup'>
+  <textarea id='playerCSV' placeholder='Add player names as csv without trailing comma' style='width: 100%'></textarea>
+  <br>
+  <button id='start'>Begin Game</button>
+</div>
+<script>
+const merlin = 'Merlin';
+const percival = 'Percival';
+const mordred = 'Mordred';
+const morgana = 'Morgana';
+const regularGood = 'Regular Good';
+const assassin = 'Assassin';
+const oberon = 'Oberon';
+const regularGoodObj = {
+  name: regularGood,
+  isGood: true,
+  knowledge: 'You know nothing. Fret not! You still play a crucial role in defeating evil!',
+  select: [],
+};
+const roles = [{
+  name: merlin,
+  isGood: true,
+  knowledge: 'You know the following players are evil:',
+  select: [morgana, assassin, oberon],
+}, {
+  name: percival,
+  isGood: true,
+  knowledge: 'You know one of the following is merlin and one is Morgana but not who is which:',
+  select: [merlin, morgana],
+}, {
+  name: mordred,
+  isGood: false,
+  knowledge: 'You know the following players are your comrads of evil:',
+  select: [morgana, assassin],
+}, {
+  name: morgana,
+  isGood: false,
+  knowledge: 'You know the following players are your comrads of evil:',
+  select: [mordred, assassin],
+},
+  regularGoodObj,
+  regularGoodObj,
+{
+  name: assassin,
+  isGood: false,
+  knowledge: 'You know the following players are your comrads of evil:',
+  select: [mordred, morgana],
+},
+  regularGoodObj,
+  regularGoodObj,
+{
+  name: oberon,
+  isGood: false,
+  knowledge: 'You know nothing! You\'re in for a good time!',
+  select: [],
+}];
+
+console.log('yo man');
+let players;
+const toggleViewById = id => {
+  const targetStyle = document.getElementById(id).style;
+  targetStyle.display = targetStyle.display === 'none'
+    ? 'block'
+    : 'none';
+}
+
+document.getElementById('start').onclick = () => {
+  const antiCheat = document.createElement('p');
+  antiCheat.innerHTML = `Anti Cheat Number: ${Math.floor(Math.random()*1000)}`;
+  document.body.appendChild(antiCheat);
+
+  let playerClickCount = 0;
+  players = document.getElementById('playerCSV').value.split(',');
+  const rolesInPlay = roles.slice(0,players.length);
+  const playerInfo = {};
+  console.log(players);
+  toggleViewById('setup');
+
+  const list = document.createElement('ul');
+  list.id = 'list';
+  const onPlayerClick = event => {
+    if (event.target.style['text-decoration'] === 'line-through') return;
+    playerClickCount++;
+    event.target.style.setProperty('text-decoration', 'line-through');
+    const player = event.target.innerHTML;
+    console.log(player);
+    toggleViewById('list');
+    const infoContainer = document.createElement('div');
+    // const infoContainer.id = 'infoContainer';
+    const title = document.createElement('h3');
+    title.innerHTML = playerInfo[player].name;
+    infoContainer.appendChild(title);
+    const description = document.createElement('div');
+    description.innerHTML = playerInfo[player].knowledge;
+    infoContainer.appendChild(description);
+    const selectionList = document.createElement('ul');
+    players.forEach(otherPlayer => {
+      if (playerInfo[player].select.includes(playerInfo[otherPlayer].name)) {
+        const li = document.createElement('li');
+        li.innerHTML = otherPlayer;
+        selectionList.appendChild(li);
+      }
+    });
+    infoContainer.appendChild(selectionList);
+    const backButton = document.createElement('button');
+    backButton.innerHTML = 'Finished Viewing';
+    backButton.onclick = () => {
+      toggleViewById('list');
+      document.body.removeChild(infoContainer);
+      if (playerClickCount === players.length) {
+        const revealButton = document.createElement('button');
+        revealButton.innerHTML = 'End game and reveal all roles!';
+        revealButton.onclick = () => {
+          document.body.removeChild(list);
+          document.body.removeChild(revealButton);
+          const revealList = document.createElement('ul');
+          players.forEach(playerName => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `${playerName} was ${playerInfo[playerName].name}`;
+            revealList.appendChild(listItem);
+          });
+          document.body.appendChild(revealList);
+          const resetButton = document.createElement('button');
+          resetButton.innerHTML = 'Reset Game';
+          resetButton.onclick = () => {
+            document.body.removeChild(antiCheat);
+            document.body.removeChild(revealList);
+            document.body.removeChild(resetButton);
+            toggleViewById('setup');
+          }
+          document.body.appendChild(resetButton);
+        }
+        document.body.appendChild(revealButton);
+      } else {
+        console.log(playerClickCount, players.length);
+      }
+    };
+    infoContainer.appendChild(backButton);
+    document.body.appendChild(infoContainer);
+  }
+  players.forEach(player => {
+    playerInfo[player] = rolesInPlay.splice(Math.floor(Math.random() * rolesInPlay.length), 1)[0];
+    const listItem = document.createElement('li');
+    listItem.innerHTML = player;
+    listItem.onclick = onPlayerClick;
+    list.appendChild(listItem);
+  });
+  document.body.appendChild(list);
+  console.log(playerInfo);
+
+  document.getElementsByTagName('ul').onClick = clicked => {
+    console.log(clicked.innerHTML);
+  }
+};
+</script>
